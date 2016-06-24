@@ -72,11 +72,22 @@ class OneD:
 				self.state.set_cell(this, self.rule(self.neighbor_vals(this)))
 		self.__ran = True
 
-	def extract_data(self):
+	def extract_data(self, nominal=False):
 		"""Returns a list of tuples, each of which contains r+1 entries,
 		where r is the number of neighbors. The first r numbers in the tuples
 		represent the state of the neighbors, and the (r+1)st entry represents
-		the state of the resulting cell."""
+		the state of the resulting cell.
+		parameters:
+			nominal: if set to True, will return the values int the tuples in a nominal
+			format (alphabets each of which correspond to a unique value). Defaults to
+			False.
+
+		example: 
+			nominal=False
+				[(1,1,0,0), (1,0,0,1)]
+			nominal=True
+				[('a', 'a', 'b', 'b'), ('a', 'b', 'b', 'a')]
+		"""
 		from loc import loc as Loc
 		data = []
 		if self.__ran == False:
@@ -85,7 +96,25 @@ class OneD:
 			for col in range(0, self.size):
 				this = Loc(row,col)
 				data.append( tuple( self.neighbor_vals(this)) + tuple([self.state.lat()[row][col]]) )
+		if nominal:
+			nom_data = []
+			vals = {}
+			##starts the assignment of alphabetic nominal characters to values
+			reached_val = chr(ord('a')-1)	
+			for tup in data:
+				new_tup = tuple( [] )
+				for val in tup:
+					if val in vals:
+						new_tup += tuple ([vals[val]])
+					else: #if new value encountered, choose a nominal character to represent it
+						reached_val = chr(ord(reached_val)+1)
+						vals[val] = reached_val
+						new_tup += tuple ([vals[val]])
+				nom_data.append(new_tup)
+			data = nom_data
+
 		return data
+
 
 
 
